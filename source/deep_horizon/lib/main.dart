@@ -81,7 +81,12 @@ class _UserCreationScreenState extends State<UserCreationScreen> {
       final prefs = await SharedPreferences.getInstance();
       final user = User(name: _nameController.text);
       
-      await prefs.setString('user', jsonEncode(user.toJson()));
+      final userJson = user.toJson();
+      print('User JSON before encoding: $userJson'); // Debug print
+      final encodedJson = jsonEncode(userJson);
+      print('Encoded JSON: $encodedJson'); // Debug print
+      
+      await prefs.setString('user', encodedJson);
       await prefs.setBool('hasUser', true);
 
       if (mounted) {
@@ -90,6 +95,7 @@ class _UserCreationScreenState extends State<UserCreationScreen> {
         );
       }
     } catch (e) {
+      print('Error creating user: $e'); // Debug print
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to create user. Please try again.')),
@@ -573,9 +579,13 @@ class _GameScreenState extends State<GameScreen> {
   Future<void> _loadUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userJsonString = prefs.getString('user');
+    print('Loaded userJsonString: $userJsonString'); // Debug print
+    
     if (userJsonString != null) {
       try {
+        print('Attempting to decode JSON...'); // Debug print
         final Map<String, dynamic> userJson = jsonDecode(userJsonString);
+        print('Decoded userJson: $userJson'); // Debug print
         setState(() {
           _user = User.fromJson(userJson);
         });
@@ -587,6 +597,62 @@ class _GameScreenState extends State<GameScreen> {
         });
       }
     }
+  }
+
+  Future<void> _addExperience(int amount) async {
+    if (_user == null) return;
+
+    // Create a new user instance with updated values
+    var updatedUser = User(
+      name: _user!.name,
+      level: _user!.level,
+      experience: _user!.experience + amount,
+      nextLevelExp: _user!.nextLevelExp,
+    );
+
+    // Check for level up
+    while (updatedUser.experience >= updatedUser.nextLevelExp) {
+      updatedUser = User(
+        name: updatedUser.name,
+        level: updatedUser.level + 1,
+        experience: updatedUser.experience - updatedUser.nextLevelExp,
+        nextLevelExp: (1000 * ((updatedUser.level + 1) * 1.5)).round(),
+      );
+      
+      // Show level up dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            backgroundColor: Colors.grey[900],
+            title: const Text(
+              'Level Up!',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: Text(
+              'Congratulations! You reached level ${updatedUser.level}!',
+              style: const TextStyle(color: Colors.white),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Continue'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    // Update the state with the new user
+    setState(() {
+      _user = updatedUser;
+    });
+
+    // Save updated user data
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(_user!.toJson()));
   }
 
   void _pauseGame() {
@@ -706,13 +772,28 @@ class _GameScreenState extends State<GameScreen> {
                 decoration: const BoxDecoration(
                   color: Colors.black,
                 ),
-                child: const Center(
-                  child: Text(
-                    'Game Screen',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                    ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Game Screen',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: () => _addExperience(500),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add 500 XP'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          backgroundColor: Colors.blue.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
