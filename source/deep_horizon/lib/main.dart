@@ -218,89 +218,136 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  Timer? _gameTimer;
-  int _score = 0;
-  bool _isPlaying = false;
+  bool _isPlaying = true;
+  // Dummy data for the captain
+  final String _captainName = "Captain Oscar";
+  final int _level = 5;
+  final int _experience = 750;
+  final int _nextLevelExp = 1000;
 
   @override
   void initState() {
     super.initState();
-    _startGame();
-  }
-
-  @override
-  void dispose() {
-    _gameTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startGame() {
-    setState(() {
-      _score = 0;
-      _isPlaying = true;
-    });
-
-    _gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      setState(() {
-        _score++;
-      });
-    });
   }
 
   void _pauseGame() {
     setState(() {
       _isPlaying = false;
     });
-    _gameTimer?.cancel();
   }
 
   void _resumeGame() {
     setState(() {
       _isPlaying = true;
     });
-    _startGame();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Game'),
+        title: const Text('Deep Horizon'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+            onPressed: _isPlaying ? _pauseGame : _resumeGame,
+          ),
+        ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.black,
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Score: $_score',
-                style: const TextStyle(
-                  fontSize: 32,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          Container(
+            color: Colors.blue.withOpacity(0.2),
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Captain Info
+                Row(
+                  children: [
+                    const Icon(Icons.person, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Text(
+                      _captainName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                // Level and Experience
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Level $_level',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.trending_up, color: Colors.green, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$_experience / $_nextLevelExp XP',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Game content
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.black,
+              ),
+              child: const Center(
+                child: Text(
+                  'Game Screen',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
-              if (_isPlaying)
-                ElevatedButton(
-                  onPressed: _pauseGame,
-                  child: const Text('Pause'),
-                )
-              else
-                ElevatedButton(
-                  onPressed: _resumeGame,
-                  child: const Text('Resume'),
-                ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
