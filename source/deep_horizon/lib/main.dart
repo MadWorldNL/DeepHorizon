@@ -30,52 +30,81 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.black,
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Deep Horizon',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/german_river.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.7),
+                    Colors.black.withOpacity(0.5),
+                    Colors.black.withOpacity(0.7),
+                  ],
                 ),
               ),
-              const SizedBox(height: 50),
-              _buildMenuButton(
-                context,
-                'Start Game',
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GameScreen()),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildMenuButton(
-                context,
-                'Settings',
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildMenuButton(
-                context,
-                'Credits',
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CreditsScreen()),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          // Content
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Deep Horizon',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2.0, 2.0),
+                        blurRadius: 3.0,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 50),
+                _buildMenuButton(
+                  context,
+                  'Start Game',
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const GameScreen()),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildMenuButton(
+                  context,
+                  'Settings',
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildMenuButton(
+                  context,
+                  'Credits',
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreditsScreen()),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -92,10 +121,14 @@ class MainMenu extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
+          elevation: 5,
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 18),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
